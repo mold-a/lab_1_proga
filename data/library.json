@@ -1,0 +1,152 @@
+{
+    "books": [
+        {
+            "book_id": 1,
+            "title": "Война и мир",
+            "author": {
+                "name": "Лев Толстой",
+                "country": "Россия"
+            },
+            "publisher": {
+                "name": "Эксмо",
+                "country": "Москва"
+            },
+            "genre": {
+                "name": "Роман"
+            },
+            "year": 1869,
+            "copies": 5
+        },
+        {
+            "book_id": 2,
+            "title": "Гарри Поттер и философский камень",
+            "author": {
+                "name": "Дж. К. Роулинг",
+                "country": "Великобритания"
+            },
+            "publisher": {
+                "name": "Bloomsbury",
+                "country": "Лондон"
+            },
+            "genre": {
+                "name": "Фэнтези"
+            },
+            "year": 1997,
+            "copies": 3
+        }
+    ],
+    "readers": [
+        {
+            "reader_id": 1,
+            "name": "Иван Иванов"
+        },
+        {
+            "reader_id": 2,
+            "name": "Мария Петрова"
+        }
+    ],
+    "employees": [
+        {
+            "employee_id": 1,
+            "name": "Алексей Смирнов"
+        }
+    ],
+    "inventory": [
+        {
+            "book": {
+                "book_id": 1,
+                "title": "Война и мир",
+                "author": {
+                    "name": "Лев Толстой",
+                    "country": "Россия"
+                },
+                "publisher": {
+                    "name": "Эксмо",
+                    "country": "Москва"
+                },
+                "genre": {
+                    "name": "Роман"
+                },
+                "year": 1869,
+                "copies": 5
+            },
+            "copies": 5
+        },
+        {
+            "book": {
+                "book_id": 2,
+                "title": "Гарри Поттер и философский камень",
+                "author": {
+                    "name": "Дж. К. Роулинг",
+                    "country": "Великобритания"
+                },
+                "publisher": {
+                    "name": "Bloomsbury",
+                    "country": "Лондон"
+                },
+                "genre": {
+                    "name": "Фэнтези"
+                },
+                "year": 1997,
+                "copies": 3
+            },
+            "copies": 2
+        }
+    ],
+    "orders": [
+        {
+            "order_id": 1,
+            "book": {
+                "book_id": 1,
+                "title": "Война и мир",
+                "author": {
+                    "name": "Лев Толстой",
+                    "country": "Россия"
+                },
+                "publisher": {
+                    "name": "Эксмо",
+                    "country": "Москва"
+                },
+                "genre": {
+                    "name": "Роман"
+                },
+                "year": 1869,
+                "copies": 5
+            },
+            "reader": {
+                "reader_id": 1,
+                "name": "Иван Иванов"
+            },
+            "issued_at": "2025-10-26T17:13:45.363971",
+            "due_at": "2025-11-09T17:13:45.363971",
+            "returned_at": "2025-10-26T17:13:45.363971"
+        },
+        {
+            "order_id": 2,
+            "book": {
+                "book_id": 2,
+                "title": "Гарри Поттер и философский камень",
+                "author": {
+                    "name": "Дж. К. Роулинг",
+                    "country": "Великобритания"
+                },
+                "publisher": {
+                    "name": "Bloomsbury",
+                    "country": "Лондон"
+                },
+                "genre": {
+                    "name": "Фэнтези"
+                },
+                "year": 1997,
+                "copies": 3
+            },
+            "reader": {
+                "reader_id": 2,
+                "name": "Мария Петрова"
+            },
+            "issued_at": "2025-10-26T17:13:45.363971",
+            "due_at": "2025-11-09T17:13:45.363971",
+            "returned_at": null
+        }
+    ]
+}
