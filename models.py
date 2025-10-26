@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 
-# -------------------- Классы предметной области --------------------
 
 class Author:
     def __init__(self, name: str, country: str):
@@ -53,7 +52,7 @@ class Genre:
 
 class Book:
     def __init__(self, book_id: int, title: str, author: Author, publisher: Publisher,
-                 genre: Genre, year: int, copies: int):
+                 genre: Genre, year: int, copies: int, category: str):
         self.book_id = book_id
         self.title = title
         self.author = author
@@ -61,6 +60,7 @@ class Book:
         self.genre = genre
         self.year = year
         self.copies = copies
+        self.category = category
 
     def __repr__(self):
         return f"Book(id={self.book_id}, title={self.title})"
@@ -73,15 +73,12 @@ class Book:
             "publisher": self.publisher.to_dict(),
             "genre": self.genre.to_dict(),
             "year": self.year,
-            "copies": self.copies
+            "copies": self.copies,
+            "category": self.category  # сериализация строки
         }
 
     @classmethod
     def from_dict(cls, data: dict) -> 'Book':
-        """
-        Десериализация книги из словаря.
-        Создаются новые объекты Author, Publisher и Genre.
-        """
         return cls(
             book_id=data["book_id"],
             title=data["title"],
@@ -89,7 +86,8 @@ class Book:
             publisher=Publisher.from_dict(data["publisher"]),
             genre=Genre.from_dict(data["genre"]),
             year=data["year"],
-            copies=data["copies"]
+            copies=data["copies"],
+            category=data.get("category", "Не указано")  # десериализация строки
         )
 
 
@@ -124,10 +122,33 @@ class Employee:
     def from_dict(cls, data: dict) -> 'Employee':
         return cls(data["employee_id"], data["name"])
 
+class Category:
+    def __init__(self, category_id: int, name: str, description: str = ""):
+        self.category_id = category_id
+        self.name = name
+        self.description = description
+
+    def __repr__(self):
+        return f"Category(id={self.category_id}, name={self.name})"
+
+    def to_dict(self) -> dict:
+        return {
+            "category_id": self.category_id,
+            "name": self.name,
+            "description": self.description
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'Category':
+        return cls(
+            category_id=data["category_id"],
+            name=data["name"],
+            description=data.get("description", "")
+        )
+
 
 class Librarian(Employee):
-    pass  # Можно добавлять методы, если нужны
-
+    pass
 
 class InventoryItem:
     def __init__(self, book: Book, copies: int):

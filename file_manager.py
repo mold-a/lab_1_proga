@@ -1,6 +1,8 @@
 import json
 import xml.etree.ElementTree as ET
 from typing import Any, List
+
+
 from models import Book, Author, Publisher, Genre, Reader, Employee, Librarian, InventoryItem, Order, Library
 
 
@@ -41,7 +43,7 @@ def library_to_json(library: Library) -> dict:
         "readers": [r.to_dict() for r in library.readers],
         "employees": [e.to_dict() for e in library.employees],
         "inventory": [i.to_dict() for i in library.inventory],
-        "orders": [o.to_dict() for o in library.orders],
+        "orders": [o.to_dict() for o in library.orders]
     }
 
 
@@ -49,25 +51,21 @@ def library_from_json(data: dict) -> Library:
     """Десериализация библиотеки из словаря JSON"""
     library = Library(name="Моя библиотека")
 
-    # Загружаем книги
     for b_data in data.get("books", []):
-        library.books.append(Book.from_dict(b_data))  # теперь без authors, publishers, genres
+        library.books.append(Book.from_dict(b_data))  # category теперь учитывается
 
-    # Загружаем читателей
     for r_data in data.get("readers", []):
         library.readers.append(Reader.from_dict(r_data))
 
-    # Загружаем сотрудников
     for e_data in data.get("employees", []):
         library.employees.append(Librarian.from_dict(e_data))
 
-    # Загружаем инвентарь
     for i_data in data.get("inventory", []):
         library.inventory.append(InventoryItem.from_dict(i_data))
 
-    # Загружаем заказы
     for o_data in data.get("orders", []):
         library.orders.append(Order.from_dict(o_data))
 
     return library
+
 
