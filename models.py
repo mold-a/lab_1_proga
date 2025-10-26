@@ -148,7 +148,25 @@ class Category:
 
 
 class Librarian(Employee):
-    pass
+    """Простейший класс библиотекаря с базовыми действиями"""
+
+    def add_reader(self, library: 'Library', reader: Reader):
+        """Просто добавляем читателя без проверки"""
+        library.readers.append(reader)
+
+    def add_book(self, library: 'Library', book: Book, copies: int = 1):
+        """Добавляем книгу, увеличиваем копии, если она уже есть"""
+        inventory_item = next((i for i in library.inventory if i.book.book_id == book.book_id), None)
+        if inventory_item:
+            inventory_item.copies += copies
+        else:
+            library.books.append(book)
+            library.inventory.append(InventoryItem(book, copies))
+
+    def view_inventory(self, library: 'Library') -> list:
+        """Простой просмотр инвентаря"""
+        return [(i.book.title, i.copies) for i in library.inventory]
+
 
 class InventoryItem:
     def __init__(self, book: Book, copies: int):
