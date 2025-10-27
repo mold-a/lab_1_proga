@@ -1,163 +1,126 @@
 import json
 import xml.etree.ElementTree as ET
-from typing import Any, List
-
-
+from typing import Any
 from models import Book, Author, Publisher, Genre, Reader, Employee, Librarian, InventoryItem, Order, Library
 
 
-# -------------------- Работа с JSON --------------------
+# -------------------- JSON --------------------
 
 def save_json(filepath: str, data: Any):
-    """Сохранение данных в JSON файл"""
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
-
 def load_json(filepath: str) -> Any:
-    """Загрузка данных из JSON файла"""
     with open(filepath, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-# -------------------- Работа с XML --------------------
+# -------------------- XML --------------------
 
-def save_xml(filepath: str, root_element: ET.Element):
-    """Сохранение данных в XML файл"""
-    tree = ET.ElementTree(root_element)
-    tree.write(filepath, encoding="utf-8", xml_declaration=True)
+def find_by_id(collection, attr, value):
+    return next((obj for obj in collection if getattr(obj, attr) == value), None)
 
-
-def load_xml(filepath: str) -> ET.Element:
-    """Загрузка данных из XML файла"""
-    tree = ET.parse(filepath)
-    return tree.getroot()
-
-import xml.etree.ElementTree as ET
-from models import Library, Book, Reader, Librarian, InventoryItem, Order
-
-# -------------------- Сохраняем библиотеку в XML --------------------
 def library_to_xml(library: Library) -> ET.Element:
     root = ET.Element("library", name=library.name)
 
-    # книги
     books_el = ET.SubElement(root, "books")
     for book in library.books:
         b_el = ET.SubElement(books_el, "book")
-        ET.SubElement(b_el, "book_id").text = str(book.book_id)
-        ET.SubElement(b_el, "title").text = book.title
-        ET.SubElement(b_el, "author").text = f"{book.author.name} ({book.author.country})"
-        ET.SubElement(b_el, "publisher").text = f"{book.publisher.name} ({book.publisher.country})"
-        ET.SubElement(b_el, "genre").text = book.genre.name
-        ET.SubElement(b_el, "category").text = book.category
-        ET.SubElement(b_el, "year").text = str(book.year)
-        ET.SubElement(b_el, "copies").text = str(book.copies)
+        for tag, val in {
+            "book_id": book.book_id,
+            "title": book.title,
+            "author": f"{book.author.name} ({book.author.country})",
+            "publisher": f"{book.publisher.name} ({book.publisher.country})",
+            "genre": book.genre.name,
+            "category": book.category,
+            "year": book.year,
+            "copies": book.copies
+        }.items():
+            ET.SubElement(b_el, tag).text = str(val)
 
-    # читатели
     readers_el = ET.SubElement(root, "readers")
-    for reader in library.readers:
-        r_el = ET.SubElement(readers_el, "reader")
-        ET.SubElement(r_el, "reader_id").text = str(reader.reader_id)
-        ET.SubElement(r_el, "name").text = reader.name
+    for r in library.readers:
+        ET.SubElement(readers_el, "reader", id=str(r.reader_id)).text = r.name
 
-    # сотрудники
     employees_el = ET.SubElement(root, "employees")
-    for emp in library.employees:
-        e_el = ET.SubElement(employees_el, "employee")
-        ET.SubElement(e_el, "employee_id").text = str(emp.employee_id)
-        ET.SubElement(e_el, "name").text = emp.name
+    for e in library.employees:
+        ET.SubElement(employees_el, "employee", id=str(e.employee_id)).text = e.name
 
-    # инвентарь
     inventory_el = ET.SubElement(root, "inventory")
-    for item in library.inventory:
-        i_el = ET.SubElement(inventory_el, "item")
-        ET.SubElement(i_el, "book_id").text = str(item.book.book_id)
-        ET.SubElement(i_el, "copies").text = str(item.copies)
+    for i in library.inventory:
+        item_el = ET.SubElement(inventory_el, "item")
+        ET.SubElement(item_el, "book_id").text = str(i.book.book_id)
+        ET.SubElement(item_el, "copies").text = str(i.copies)
 
-    # заказы
     orders_el = ET.SubElement(root, "orders")
-    for order in library.orders:
-        o_el = ET.SubElement(orders_el, "order")
-        ET.SubElement(o_el, "order_id").text = str(order.order_id)
-        ET.SubElement(o_el, "book_id").text = str(order.book.book_id)
-        ET.SubElement(o_el, "reader_id").text = str(order.reader.reader_id)
-        ET.SubElement(o_el, "issued_at").text = str(order.issued_at)
-        ET.SubElement(o_el, "due_at").text = str(order.due_at)
-        ET.SubElement(o_el, "returned_at").text = str(order.returned_at) if order.returned_at else ""
+    for o in library.orders:
+        order_el = ET.SubElement(orders_el, "order")
+        for tag, val in {
+            "order_id": o.order_id,
+            "book_id": o.book.book_id,
+            "reader_id": o.reader.reader_id,
+            "issued_at": o.issued_at,
+            "due_at": o.due_at,
+            "returned_at": o.returned_at or ""
+        }.items():
+            ET.SubElement(order_el, tag).text = str(val)
 
     return root
 
+def save_library_to_xml(filepath: str, library: Library):
+    tree = ET.ElementTree(library_to_xml(library))
+    tree.write(filepath, encoding="utf-8", xml_declaration=True)
 
-# -------------------- Загружаем библиотеку из XML --------------------
+def load_xml(filepath: str) -> ET.Element:
+    return ET.parse(filepath).getroot()
+
 def library_from_xml(root: ET.Element) -> Library:
     library = Library(name=root.attrib.get("name", "Моя библиотека"))
 
-    # книги
-    for b_el in root.find("books"):
-        author_name, author_country = b_el.find("author").text.split(" (")
-        author_country = author_country.rstrip(")")
-        publisher_name, publisher_country = b_el.find("publisher").text.split(" (")
-        publisher_country = publisher_country.rstrip(")")
+    for b in root.find("books"):
+        author_name, author_country = b.find("author").text.split(" (")
+        publisher_name, publisher_country = b.find("publisher").text.split(" (")
         book = Book(
-            book_id=int(b_el.find("book_id").text),
-            title=b_el.find("title").text,
-            author=Author(author_name, author_country),
-            publisher=Publisher(publisher_name, publisher_country),
-            genre=Genre(b_el.find("genre").text),
-            year=int(b_el.find("year").text),
-            copies=int(b_el.find("copies").text),
-            category=b_el.find("category").text
+            int(b.find("book_id").text),
+            b.find("title").text,
+            Author(author_name, author_country.rstrip(")")),
+            Publisher(publisher_name, publisher_country.rstrip(")")),
+            Genre(b.find("genre").text),
+            int(b.find("year").text),
+            int(b.find("copies").text),
+            b.find("category").text
         )
         library.books.append(book)
 
-    # читатели
-    for r_el in root.find("readers"):
-        reader = Reader(
-            reader_id=int(r_el.find("reader_id").text),
-            name=r_el.find("name").text
-        )
-        library.readers.append(reader)
+    for r in root.find("readers"):
+        library.readers.append(Reader(int(r.attrib["id"]), r.text))
 
-    # сотрудники
-    for e_el in root.find("employees"):
-        emp = Librarian(
-            employee_id=int(e_el.find("employee_id").text),
-            name=e_el.find("name").text
-        )
-        library.employees.append(emp)
+    for e in root.find("employees"):
+        library.employees.append(Librarian(int(e.attrib["id"]), e.text))
 
-    # инвентарь
-    for i_el in root.find("inventory"):
-        book_id = int(i_el.find("book_id").text)
-        copies = int(i_el.find("copies").text)
-        book = next((b for b in library.books if b.book_id == book_id), None)
+    for i in root.find("inventory"):
+        book = find_by_id(library.books, "book_id", int(i.find("book_id").text))
         if book:
-            library.inventory.append(InventoryItem(book, copies))
+            library.inventory.append(InventoryItem(book, int(i.find("copies").text)))
 
-    # заказы
-    for o_el in root.find("orders"):
-        book_id = int(o_el.find("book_id").text)
-        reader_id = int(o_el.find("reader_id").text)
-        book = next((b for b in library.books if b.book_id == book_id), None)
-        reader = next((r for r in library.readers if r.reader_id == reader_id), None)
+    for o in root.find("orders"):
+        book = find_by_id(library.books, "book_id", int(o.find("book_id").text))
+        reader = find_by_id(library.readers, "reader_id", int(o.find("reader_id").text))
         if book and reader:
-            order = Order(
-                order_id=int(o_el.find("order_id").text),
-                book=book,
-                reader=reader,
-                issued_at=o_el.find("issued_at").text,
-                due_at=o_el.find("due_at").text,
-                returned_at=o_el.find("returned_at").text or None
-            )
-            library.orders.append(order)
+            library.orders.append(Order(
+                int(o.find("order_id").text),
+                book, reader,
+                o.find("issued_at").text,
+                o.find("due_at").text,
+                o.find("returned_at").text or None
+            ))
 
     return library
 
 
-# -------------------- Примеры сериализации/десериализации --------------------
+# -------------------- JSON Conversion --------------------
 
 def library_to_json(library: Library) -> dict:
-    """Сериализация всей библиотеки в словарь для JSON"""
     return {
         "books": [b.to_dict() for b in library.books],
         "readers": [r.to_dict() for r in library.readers],
@@ -166,26 +129,11 @@ def library_to_json(library: Library) -> dict:
         "orders": [o.to_dict() for o in library.orders]
     }
 
-
 def library_from_json(data: dict) -> Library:
-    """Десериализация библиотеки из словаря JSON"""
-    library = Library(name="Моя библиотека")
-
-    for b_data in data.get("books", []):
-        library.books.append(Book.from_dict(b_data))  # category теперь учитывается
-
-    for r_data in data.get("readers", []):
-        library.readers.append(Reader.from_dict(r_data))
-
-    for e_data in data.get("employees", []):
-        library.employees.append(Librarian.from_dict(e_data))
-
-    for i_data in data.get("inventory", []):
-        library.inventory.append(InventoryItem.from_dict(i_data))
-
-    for o_data in data.get("orders", []):
-        library.orders.append(Order.from_dict(o_data))
-
-    return library
-
-
+    lib = Library("Моя библиотека")
+    for b in data.get("books", []): lib.books.append(Book.from_dict(b))
+    for r in data.get("readers", []): lib.readers.append(Reader.from_dict(r))
+    for e in data.get("employees", []): lib.employees.append(Librarian.from_dict(e))
+    for i in data.get("inventory", []): lib.inventory.append(InventoryItem.from_dict(i))
+    for o in data.get("orders", []): lib.orders.append(Order.from_dict(o))
+    return lib
